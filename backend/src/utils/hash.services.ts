@@ -8,7 +8,7 @@ export interface Hasher {
 export class HashService implements Hasher {
     constructor(
         private rounds: number
-    ) {}
+    ) { }
 
     async createHash(value: string) {
         const hashValue = await hash(value, this.rounds)
