@@ -1,5 +1,3 @@
-import { sign, verify } from "jsonwebtoken"
-
 export interface Jwt {
     createToken(payload: any): string
     decodeToken(token: string): any
@@ -8,16 +6,18 @@ export interface Jwt {
 export class JwtService implements Jwt {
     constructor(
         private secretKey: string,
-        private duration: number | string
+        private duration: number | string,
+        private sign: (payload: any, secretKey: string, options: any) => string,
+        private verify: (token: any, secretKey: string) => any,
     ) { }
 
     createToken(payload: any): string {
-        const token = sign(payload, this.secretKey, { expiresIn: this.duration })
+        const token = this.sign(payload, this.secretKey, { expiresIn: this.duration })
         return token
     }
 
     decodeToken(token: string): any {
-        const decoded = verify(token, this.secretKey)
+        const decoded = this.verify(token, this.secretKey)
         return decoded
     }
 }

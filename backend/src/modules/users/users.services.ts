@@ -3,8 +3,9 @@ import { Repository } from "typeorm"
 import { UserDto, UserEntity } from "./users.entity"
 import { Hasher } from "@/utils/hash.services"
 import { Jwt } from "@/utils/jwt.services"
+import { User } from "./users.interface"
 
-export class UserService {
+export class UserService implements User {
     constructor(
         private userRepo: Repository<UserEntity>,
         private hashService: Hasher,
@@ -32,7 +33,7 @@ export class UserService {
 
     async authenticate(username: string, password: string): Promise<string | false | null> {
         try {
-            const user = await this.userRepo.findOneBy({ username })
+            const user = await this.userRepo.findOne({ where: { username }, select: ['id', 'password'] })
 
             if (user === null) return false
 
@@ -40,7 +41,15 @@ export class UserService {
 
             if (!passwordsMatch) return false
 
-            return this.jwtService.createToken({ id: user.id, username: user.username })
+            return this.jwtService.createToken({ id: user.id, username })
+        } catch (error) {
+            return null
+        }
+    }
+
+    async getOne(id: string): Promise<Omit<UserEntity, 'password'> | null> {
+        try {
+            return await this.userRepo.findOneBy({ id })
         } catch (error) {
             return null
         }
