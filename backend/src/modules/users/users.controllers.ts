@@ -10,7 +10,10 @@ import {
 export class UserController implements UserAdapter {
 	constructor(private userService: User) {}
 
-	async create(req: Request, res: Response): Promise<Response<any>> {
+	public create = async (
+		req: Request,
+		res: Response
+	): Promise<Response<any>> => {
 		const payload = req.body;
 		let response:
 			| InternalServerErrorResponse
@@ -25,9 +28,12 @@ export class UserController implements UserAdapter {
 			response = new BadRequestResponse(resultCreation);
 
 		return res.status(response.statusCode).json(response);
-	}
+	};
 
-	async readOne(req: Request, res: Response): Promise<Response<any>> {
+	public readOne = async (
+		req: Request,
+		res: Response
+	): Promise<Response<any>> => {
 		const { id } = req.params;
 		let response: BadRequestResponse | OkResponse = new BadRequestResponse(
 			"User not found"
@@ -38,5 +44,5 @@ export class UserController implements UserAdapter {
 		if (user !== null) response = new OkResponse(user);
 
 		return res.status(response.statusCode).json(response);
-	}
+	};
 }

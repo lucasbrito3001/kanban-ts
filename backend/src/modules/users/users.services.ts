@@ -13,7 +13,9 @@ export class UserService implements User {
 		private dtoSchema: Joi.ObjectSchema
 	) {}
 
-	async create(user: UserDto): Promise<boolean | null | Joi.ValidationError> {
+	public create = async (
+		user: UserDto
+	): Promise<boolean | null | Joi.ValidationError> => {
 		try {
 			const { error, value } = this.dtoSchema.validate(user);
 
@@ -29,12 +31,12 @@ export class UserService implements User {
 		} catch (error) {
 			return null;
 		}
-	}
+	};
 
-	async authenticate(
+	public authenticate = async (
 		username: string,
 		password: string
-	): Promise<string | false | null> {
+	): Promise<string | false | null> => {
 		try {
 			const user = await this.userRepo.findOne({
 				where: { username },
@@ -54,13 +56,15 @@ export class UserService implements User {
 		} catch (error) {
 			return null;
 		}
-	}
+	};
 
-	async getOne(id: string): Promise<Omit<UserEntity, "password"> | null> {
+	public getOne = async (
+		id: string
+	): Promise<Omit<UserEntity, "password"> | null> => {
 		try {
 			return await this.userRepo.findOneBy({ id });
 		} catch (error) {
 			return null;
 		}
-	}
+	};
 }
