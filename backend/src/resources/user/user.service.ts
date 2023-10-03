@@ -1,15 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateUserDto, createUserDtoSchema } from './dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { IUserService, Token } from './types/user-service.type';
+import { IUserService, UserSelect } from './types/user.service.type';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { ResponseService } from '@/utils/response/response.service';
 import { ResponseFormat } from '@/utils/response/response.type';
 import { SessionService } from '@/utils/session/session.service';
 import { CryptoService } from '@/utils/crypto/crypto.service';
-import * as Joi from 'joi';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Token } from '@/utils/session/session.type';
+import { ErrorTypes } from '@/constants';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -19,40 +20,46 @@ export class UserService implements IUserService {
         private responseService: ResponseService,
         private sessionService: SessionService,
         private cryptoService: CryptoService,
-        @Inject('CREATE_USER_SCHEMA_DTO')
-        private createUserDtoSchema: Joi.ObjectSchema,
     ) {}
 
-    async create(createUserDto: CreateUserDto): Promise<ResponseFormat> {
+    async create(
+        createUserDto: CreateUserDto,
+    ): Promise<ResponseFormat<UserSelect>> {
         try {
-            const { error, value } =
-                this.createUserDtoSchema.validate(createUserDto);
+            const result = await this.userRepository.findOneBy({
+                username: createUserDto.username,
+            });
 
-            if (error)
-                return this.responseService.formatError('invalid DTO schema');
+            if (result !== null)
+                return this.responseService.formatError(
+                    ErrorTypes.DUPLICATED_KEY,
+                );
 
             const hashPassword = await this.cryptoService.createHash(
-                value.password,
+                createUserDto.password,
             );
 
             if (hashPassword === null)
-                return this.responseService.formatError('password dont match');
+                return this.responseService.formatError(ErrorTypes.HASH_ERROR);
 
-            const user = await this.userRepository.save({
-                ...value,
+            const { password, ...user } = await this.userRepository.save({
+                ...createUserDto,
                 password: hashPassword,
             });
 
             return this.responseService.formatSuccess(user);
         } catch (error) {
-            return this.responseService.formatError(error);
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
         }
     }
 
     async authenticate(
         username: string,
         password: string,
-    ): Promise<ResponseFormat> {
+    ): Promise<ResponseFormat<Token>> {
         try {
             const user = await this.userRepository.findOne({
                 where: { username },
@@ -60,7 +67,9 @@ export class UserService implements IUserService {
             });
 
             if (user === null)
-                return this.responseService.formatError('username not found');
+                return this.responseService.formatError(
+                    ErrorTypes.BAD_USERNAME,
+                );
 
             const passwordsMatch = await this.cryptoService.compareHash(
                 user.password,
@@ -68,7 +77,9 @@ export class UserService implements IUserService {
             );
 
             if (!passwordsMatch)
-                return this.responseService.formatError('passwords dont match');
+                return this.responseService.formatError(
+                    ErrorTypes.BAD_PASSWORD,
+                );
 
             const token = this.sessionService.createToken({
                 id: user.id,
@@ -77,28 +88,72 @@ export class UserService implements IUserService {
 
             return this.responseService.formatSuccess(token);
         } catch (error) {
-            return this.responseService.formatError(error);
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
         }
     }
 
-    async findAll(): Promise<ResponseFormat<Omit<User, 'password'>[]>> {
+    async findOne(id: string): Promise<ResponseFormat<UserSelect>> {
         try {
+            const user = await this.userRepository.findOneBy({ id });
+
+            if (user === null)
+                return this.responseService.formatError(
+                    ErrorTypes.RESOURCE_NOT_FOUND,
+                );
+
+            return this.responseService.formatSuccess(user);
         } catch (error) {
-            return this.responseService.formatError(error);
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
         }
     }
 
-    async findOne(id: string): Promise<ResponseFormat<Omit<User, 'password'>>> {
+    async update(
+        id: string,
+        updateUserDto: UpdateUserDto,
+    ): Promise<ResponseFormat<UserSelect>> {
         try {
-        } catch (error) {}
-        return `This action returns a #${id} user`;
+            const { affected } = await this.userRepository.update(
+                { id },
+                updateUserDto,
+            );
+
+            if (affected === 0)
+                return this.responseService.formatError(
+                    ErrorTypes.RESOURCE_NOT_FOUND,
+                );
+
+            const user = await this.userRepository.findOneBy({ id });
+
+            return this.responseService.formatSuccess(user);
+        } catch (error) {
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
+        }
     }
 
-    // update(id: number, updateUserDto: UpdateUserDto) {
-    //   return `This action updates a #${id} user`;
-    // }
+    async remove(id: string): Promise<ResponseFormat<string>> {
+        try {
+            const { affected } = await this.userRepository.delete({ id });
 
-    // remove(id: number) {
-    //   return `This action removes a #${id} user`;
-    // }
+            if (affected === 0)
+                return this.responseService.formatError(
+                    ErrorTypes.RESOURCE_NOT_FOUND,
+                );
+
+            return this.responseService.formatSuccess(id);
+        } catch (error) {
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
+        }
+    }
 }

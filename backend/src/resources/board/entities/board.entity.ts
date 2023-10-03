@@ -4,6 +4,8 @@ import {
 	PrimaryGeneratedColumn,
 	Column,
 	OneToMany,
+	CreateDateColumn,
+	UpdateDateColumn,
 } from "typeorm";
 import { BoardMember } from "@/resources/board-member/entities/board-member.entity";
 
@@ -18,6 +20,12 @@ export class Board {
 	@Column({ length: 7, nullable: false })
 	bgColor!: string;
 
+	@CreateDateColumn()
+    public createdAt: Date;
+
+    @UpdateDateColumn()
+    public updatedAt: Date;
+
 	@OneToMany(() => BoardMember, (boardMember) => boardMember.board)
 	public boardMembers!: BoardMember[];
 }
@@ -26,8 +34,3 @@ export type BoardDto = {
 	name: string;
 	bgColor: string;
 };
-
-export const boardDtoSchema = Joi.object({
-	name: Joi.string().alphanum().max(48).required(),
-	bgColor: Joi.string().alphanum().length(7).required(),
-});

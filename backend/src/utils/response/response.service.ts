@@ -7,7 +7,7 @@ export class ResponseService implements IResponseService {
         return { status: true, content };
     }
 
-    formatError(error: any): ResponseFormat {
-        return { status: false, error };
+    formatError(errorType: string, error?: any): ResponseFormat {
+        return { status: false, errorType, error };
     }
 }
