@@ -5,12 +5,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
 import { BoardMember } from '../board-member/entities/board-member.entity';
 import { UtilsModule } from '@/utils/utils.module';
-import { BoardMemberService } from '../board-member/board-member.service';
-import { User } from '../user/entities/user.entity';
+import { ListModule } from '../list/list.module';
+import { BoardMemberModule } from '../board-member/board-member.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User, Board, BoardMember]), UtilsModule],
+    imports: [
+        TypeOrmModule.forFeature([Board, BoardMember]),
+        UtilsModule,
+        BoardMemberModule,
+        ListModule,
+    ],
     controllers: [BoardController],
-    providers: [BoardService, BoardMemberService],
+    providers: [BoardService],
 })
 export class BoardModule {}

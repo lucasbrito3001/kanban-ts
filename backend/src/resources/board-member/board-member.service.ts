@@ -62,7 +62,7 @@ export class BoardMemberService {
         }
     }
 
-    async findByBoardId(
+    async findByBoard(
         boardId: string,
     ): Promise<ResponseFormat<BoardMember[]>> {
         try {
@@ -101,10 +101,9 @@ export class BoardMemberService {
                     ErrorTypes.RESOURCE_NOT_FOUND,
                 );
 
-            return this.responseService.formatSuccess({
-                id,
-                ...updateBoardMemberDto,
-            });
+            const member = await this.boardMemberRepository.findOneBy({ id });
+
+            return this.responseService.formatSuccess(member);
         } catch (error) {
             return this.responseService.formatError(
                 ErrorTypes.UNEXPECTED_EXCEPTION,

@@ -29,7 +29,9 @@ export class BoardService implements IBoardService {
             });
 
             if (foundBoard !== null)
-                return this.responseService.formatError(ErrorTypes.DUPLICATED_KEY);
+                return this.responseService.formatError(
+                    ErrorTypes.DUPLICATED_KEY,
+                );
 
             const board = await this.boardRepository.save(createBoardDto);
 
@@ -44,16 +46,22 @@ export class BoardService implements IBoardService {
 
     async findByUser(userId: string): Promise<ResponseFormat<Board[]>> {
         try {
-            const boards = await this.boardMemberRepository.findBy({
-                user: { id: userId },
+            const boards = await this.boardMemberRepository.find({
+                where: { user: { id: userId } },
+                relations: ['board'],
             });
 
             if (boards.length === 0)
-                this.responseService.formatError(ErrorTypes.RESOURCE_NOT_FOUND);
+                return this.responseService.formatError(
+                    ErrorTypes.RESOURCE_NOT_FOUND,
+                );
 
             return this.responseService.formatSuccess(boards);
         } catch (error) {
-            return this.responseService.formatError(ErrorTypes.UNEXPECTED_EXCEPTION, error);
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
         }
     }
 
@@ -62,11 +70,16 @@ export class BoardService implements IBoardService {
             const board = await this.boardRepository.findOneBy({ id });
 
             if (board === null)
-                this.responseService.formatError(ErrorTypes.RESOURCE_NOT_FOUND);
+                return this.responseService.formatError(
+                    ErrorTypes.RESOURCE_NOT_FOUND,
+                );
 
             return this.responseService.formatSuccess(board);
         } catch (error) {
-            return this.responseService.formatError(ErrorTypes.UNEXPECTED_EXCEPTION, error);
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
         }
     }
 
@@ -81,11 +94,13 @@ export class BoardService implements IBoardService {
             );
 
             if (affected === 0)
-                return this.responseService.formatError(ErrorTypes.RESOURCE_NOT_FOUND);
+                return this.responseService.formatError(
+                    ErrorTypes.RESOURCE_NOT_FOUND,
+                );
 
-            const user = await this.boardRepository.findOneBy({ id });
+            const board = await this.boardRepository.findOneBy({ id });
 
-            return this.responseService.formatSuccess(user);
+            return this.responseService.formatSuccess(board);
         } catch (error) {
             return this.responseService.formatError(
                 ErrorTypes.UNEXPECTED_EXCEPTION,
@@ -99,7 +114,9 @@ export class BoardService implements IBoardService {
             const { affected } = await this.boardRepository.delete({ id });
 
             if (affected === 0)
-                return this.responseService.formatError(ErrorTypes.RESOURCE_NOT_FOUND);
+                return this.responseService.formatError(
+                    ErrorTypes.RESOURCE_NOT_FOUND,
+                );
 
             return this.responseService.formatSuccess(id);
         } catch (error) {

@@ -12,3 +12,8 @@ export const createBoardMemberDtoSchema = Joi.object({
         .valid(...Object.values(ValidRoles))
         .required(),
 });
+
+export const MOCK_CREATE_MEMBER_DTO = {
+    boardId: '00000000-0000-0000-0000-000000000000',
+    role: 'reader'
+}

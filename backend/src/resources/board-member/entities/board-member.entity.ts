@@ -2,7 +2,6 @@ import {
     Entity,
     PrimaryGeneratedColumn,
     Column,
-    JoinTable,
     ManyToOne,
     CreateDateColumn,
     UpdateDateColumn,
@@ -38,12 +37,12 @@ export class BoardMember {
     public updatedAt: Date;
 
     @ManyToOne(() => User, (user) => user.boardMembers, { nullable: false })
-    @JoinColumn({ name: 'userId' })
+    @JoinColumn()
     public user!: User;
 
-    @ManyToOne(() => Board, (board) => board.boardMembers, {
+    @ManyToOne(() => Board, (board) => board.members, {
         nullable: false,
     })
-    @JoinColumn({ name: 'boardId' })
+    @JoinColumn()
     public board!: Board;
 }

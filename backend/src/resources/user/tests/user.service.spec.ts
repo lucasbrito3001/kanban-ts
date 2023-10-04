@@ -39,6 +39,12 @@ describe('UserService', () => {
         service = module.get<UserService>(UserService);
     });
 
+    afterEach(() => {
+        Object.keys(mockRepository).forEach((key) => {
+            mockRepository[key].mockRestore();
+        });
+    });
+
     describe('create', () => {
         it('should return UNEXPECTED_EXCEPTION', async () => {
             const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');

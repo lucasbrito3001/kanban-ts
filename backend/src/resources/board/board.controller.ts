@@ -18,6 +18,7 @@ import { BoardMemberService } from '../board-member/board-member.service';
 import { AuthGuard } from '@/guards/auth/auth.guard';
 import { JwtPayload } from '@/decorator/jwt-payload/jwt-payload.decorator';
 import { JwtPayload as JwtLibPayload } from 'jsonwebtoken';
+import { ListService } from '../list/list.service';
 
 @Controller('board')
 @UseGuards(AuthGuard)
@@ -25,6 +26,7 @@ export class BoardController {
     constructor(
         private readonly boardService: BoardService,
         private readonly boardMemberService: BoardMemberService,
+        private readonly listService: ListService,
         private readonly errorHandlerService: ErrorHandlerService,
     ) {}
 
@@ -54,18 +56,59 @@ export class BoardController {
 
     @Get(':id')
     async findOne(@Param('id') id: string) {
-        const { status, content, errorType, error } =
-            await this.boardService.findOne(id);
+        const board = await this.boardService.findOne(id);
 
-        if (!status) this.errorHandlerService.throwError(errorType, error);
+        if (!board.status)
+            return this.errorHandlerService.throwError(
+                board.errorType,
+                board.error,
+            );
+
+        const members = await this.boardMemberService.findByBoard(
+            board.content.id,
+        );
+
+        console.log(members)
+
+        if (!members.status)
+            return this.errorHandlerService.throwError(
+                members.errorType,
+                members.error,
+            );
+
+        const lists = await this.listService.findByBoard(board.content.id);
+
+        if (!lists.status)
+            return this.errorHandlerService.throwError(
+                lists.errorType,
+                lists.error,
+            );
+
+        return {
+            statusCode: HttpStatus.OK,
+            content: {
+                ...board,
+                lists,
+                members,
+            },
+        };
+    }
+
+    @Get(':id/member')
+    async findMembers(@Param('id') id: string) {
+        const { status, content, errorType, error } =
+            await this.boardMemberService.findByBoard(id);
+
+        if (!status)
+            return this.errorHandlerService.throwError(errorType, error);
 
         return { statusCode: HttpStatus.OK, content };
     }
 
-    @Get(':id/members')
-    async findMembers(@Param('id') id: string) {
+    @Get(':id/list')
+    async findLists(@Param('id') id: string) {
         const { status, content, errorType, error } =
-            await this.boardMemberService.findByBoardId(id);
+            await this.listService.findByBoard(id);
 
         if (!status) this.errorHandlerService.throwError(errorType, error);
 

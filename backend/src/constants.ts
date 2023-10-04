@@ -54,3 +54,5 @@ export const SERVICE_ERRORS_DICT: ErrorDict = {
         message: 'The user is not authenticated',
     },
 };
+
+export const MOCK_UUID = '00000000-0000-0000-0000-000000000000'

@@ -1,37 +1,33 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BoardMemberService } from '../board-member.service';
+import { ListService } from '../list.service';
 import { mockRepository } from '@/mocks';
 import { ResponseService } from '@/utils/response/response.service';
-import { Board } from '@/resources/board/entities/board.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { BoardMember } from '../entities/board-member.entity';
-import { User } from '@/resources/user/entities/user.entity';
-import { MOCK_CREATE_MEMBER_DTO } from '../dto/create-board-member.dto';
+import { List } from '../entities/list.entity';
+import { MOCK_CREATE_LIST_DTO } from '../dto/create-list.dto';
+import { ErrorTypes, MOCK_UUID } from '@/constants';
+import { Board } from '@/resources/board/entities/board.entity';
 
-describe('BoardMemberService', () => {
-    let service: BoardMemberService;
+describe('ListService', () => {
+    let service: ListService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                BoardMemberService,
+                ListService,
                 ResponseService,
                 {
-                    provide: getRepositoryToken(User),
+                    provide: getRepositoryToken(List),
                     useValue: mockRepository,
                 },
                 {
                     provide: getRepositoryToken(Board),
                     useValue: mockRepository,
                 },
-                {
-                    provide: getRepositoryToken(BoardMember),
-                    useValue: mockRepository,
-                },
             ],
         }).compile();
 
-        service = module.get<BoardMemberService>(BoardMemberService);
+        service = module.get<ListService>(ListService);
     });
 
     afterEach(() => {
@@ -42,13 +38,11 @@ describe('BoardMemberService', () => {
 
     describe('create', () => {
         it('should return UNEXPECTED_EXCEPTION when throw any unhandled error', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-            spyFindOneBy.mockRejectedValueOnce('error');
+            const spySave = jest.spyOn(mockRepository, 'save');
 
-            const result = await service.create(
-                '00000000-0000-0000-0000-000000000000',
-                MOCK_CREATE_MEMBER_DTO,
-            );
+            spySave.mockRejectedValueOnce('error');
+
+            const result = await service.create(MOCK_CREATE_LIST_DTO);
 
             expect(result).toStrictEqual({
                 status: false,
@@ -57,33 +51,14 @@ describe('BoardMemberService', () => {
             });
         });
 
-        it('should return DUPLICATED_KEY when try to create a user that already exists', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-            spyFindOneBy.mockResolvedValueOnce({} as Board);
-
-            const result = await service.create(
-                '00000000-0000-0000-0000-000000000000',
-                MOCK_CREATE_MEMBER_DTO,
-            );
-
-            expect(result).toStrictEqual({
-                status: false,
-                errorType: 'DUPLICATED_KEY',
-                error: undefined,
-            });
-        });
-
-        it('should create board successfully', async () => {
+        it('should create a list successfully', async () => {
             const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
             const spySave = jest.spyOn(mockRepository, 'save');
 
             spyFindOneBy.mockResolvedValueOnce(null);
             spySave.mockResolvedValueOnce({ mock: 'mock' });
 
-            const result = await service.create(
-                '00000000-0000-0000-0000-000000000000',
-                MOCK_CREATE_MEMBER_DTO,
-            );
+            const result = await service.create(MOCK_CREATE_LIST_DTO);
 
             expect(result).toStrictEqual({
                 status: true,
@@ -108,8 +83,9 @@ describe('BoardMemberService', () => {
             });
         });
 
-        it('should return RESOURCE_NOT_FOUND when have no members in the board', async () => {
+        it('should return RESOURCE_NOT_FOUND when lists length equals 0', async () => {
             const spyFindBy = jest.spyOn(mockRepository, 'findBy');
+
             spyFindBy.mockResolvedValueOnce([]);
 
             const result = await service.findByBoard(
@@ -123,8 +99,9 @@ describe('BoardMemberService', () => {
             });
         });
 
-        it('should read board members successfully', async () => {
+        it('should read lists successfully', async () => {
             const spyFindBy = jest.spyOn(mockRepository, 'findBy');
+
             spyFindBy.mockResolvedValueOnce([{ mock: 'mock' }]);
 
             const result = await service.findByBoard(
@@ -144,7 +121,10 @@ describe('BoardMemberService', () => {
 
             spyUpdate.mockRejectedValueOnce('error');
 
-            const result = await service.update('id', MOCK_CREATE_MEMBER_DTO);
+            const result = await service.update(
+                '00000000-0000-0000-0000-000000000000',
+                MOCK_CREATE_LIST_DTO,
+            );
 
             expect(result).toStrictEqual({
                 status: false,
@@ -153,12 +133,15 @@ describe('BoardMemberService', () => {
             });
         });
 
-        it('should return RESOURCE_NOT_FOUND when affect 0 boards', async () => {
+        it('should return RESOURCE_NOT_FOUND when affect 0 lists', async () => {
             const spyUpdate = jest.spyOn(mockRepository, 'update');
 
             spyUpdate.mockResolvedValueOnce({ affected: 0 });
 
-            const result = await service.update('id', MOCK_CREATE_MEMBER_DTO);
+            const result = await service.update(
+                '00000000-0000-0000-0000-000000000000',
+                MOCK_CREATE_LIST_DTO,
+            );
 
             expect(result).toStrictEqual({
                 status: false,
@@ -167,18 +150,26 @@ describe('BoardMemberService', () => {
             });
         });
 
-        it('should update a board successfully', async () => {
+        it('should update list successfully', async () => {
             const spyUpdate = jest.spyOn(mockRepository, 'update');
             const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
 
-            spyUpdate.mockResolvedValueOnce({ affected: 1 });
-            spyFindOneBy.mockResolvedValueOnce({});
+            const list = {
+                ...MOCK_CREATE_LIST_DTO,
+                id: MOCK_UUID,
+            };
 
-            const result = await service.update('id', MOCK_CREATE_MEMBER_DTO);
+            spyUpdate.mockResolvedValueOnce({ affected: 1 });
+            spyFindOneBy.mockResolvedValueOnce(list);
+
+            const result = await service.update(
+                '00000000-0000-0000-0000-000000000000',
+                MOCK_CREATE_LIST_DTO,
+            );
 
             expect(result).toStrictEqual({
                 status: true,
-                content: {},
+                content: list,
             });
         });
     });
@@ -198,7 +189,7 @@ describe('BoardMemberService', () => {
             });
         });
 
-        it('should return RESOURCE_NOT_FOUND when affect 0 boards', async () => {
+        it('should return RESOURCE_NOT_FOUND when affect 0 lists', async () => {
             const spyDelete = jest.spyOn(mockRepository, 'delete');
 
             spyDelete.mockResolvedValueOnce({ affected: 0 });
@@ -212,7 +203,7 @@ describe('BoardMemberService', () => {
             });
         });
 
-        it('should delete a board successfully', async () => {
+        it('should delete a list successfully', async () => {
             const spyDelete = jest.spyOn(mockRepository, 'delete');
 
             spyDelete.mockResolvedValueOnce({ affected: 1 });
