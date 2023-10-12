@@ -9,7 +9,6 @@ import {
     JoinColumn,
 } from 'typeorm';
 import { BoardMember } from '@/resources/board-member/entities/board-member.entity';
-import { Card } from '@/resources/card/entities/card.entity';
 import { List } from '@/resources/list/entities/list.entity';
 
 @Entity({ name: 'board' })
@@ -32,10 +31,6 @@ export class Board {
     @OneToMany(() => BoardMember, (boardMember) => boardMember.board)
     @JoinColumn()
     public members!: BoardMember[];
-
-    @OneToMany(() => Card, (card) => card.board)
-    @JoinColumn()
-    public cards!: Card[];
 
     @OneToMany(() => List, (list) => list.board)
     @JoinColumn()

@@ -1,10 +1,12 @@
 import { Board } from '@/resources/board/entities/board.entity';
+import { Card } from '@/resources/card/entities/card.entity';
 import {
     Column,
     CreateDateColumn,
     Entity,
     JoinColumn,
     ManyToOne,
+    OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
@@ -29,4 +31,8 @@ export class List {
     @ManyToOne(() => Board, (board) => board.lists, { nullable: false })
     @JoinColumn()
     public board!: Board;
+
+    @OneToMany(() => Card, (card) => card.list)
+    @JoinColumn()
+    public cards!: Card[];
 }

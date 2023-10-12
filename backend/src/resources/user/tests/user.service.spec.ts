@@ -1,16 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from '../user.service';
-import {
-    MOCK_CREATE_USER_DTO,
-    createUserDtoSchema,
-} from '../dto/create-user.dto';
+import { MOCK_CREATE_USER_DTO } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
 import { ResponseService } from '@/utils/response/response.service';
 import { SessionService } from '@/utils/session/session.service';
 import { CryptoService } from '@/utils/crypto/crypto.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { MOCK_AUTH_USER_DTO, authUserDtoSchema } from '../dto/auth-user.dto';
-import { updateUserDtoSchema } from '../dto/update-user.dto';
+import { MOCK_AUTH_USER_DTO } from '../dto/auth-user.dto';
 import { mockCrypto, mockRepository, mockSession } from '@/mocks';
 
 describe('UserService', () => {
@@ -47,9 +43,7 @@ describe('UserService', () => {
 
     describe('create', () => {
         it('should return UNEXPECTED_EXCEPTION', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-
-            spyFindOneBy.mockRejectedValueOnce('error');
+            mockRepository.findOneBy.mockRejectedValueOnce('error');
 
             const result = await service.create(MOCK_CREATE_USER_DTO);
 
@@ -61,8 +55,7 @@ describe('UserService', () => {
         });
 
         it('should return DUPLICATED_KEY', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-            spyFindOneBy.mockResolvedValueOnce({} as User);
+            mockRepository.findOneBy.mockResolvedValueOnce({} as User);
 
             const result = await service.create(MOCK_CREATE_USER_DTO);
 
@@ -74,11 +67,8 @@ describe('UserService', () => {
         });
 
         it('should return HASH_ERROR', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-            const spyCreateHash = jest.spyOn(mockCrypto, 'createHash');
-
-            spyFindOneBy.mockResolvedValueOnce(null);
-            spyCreateHash.mockReturnValueOnce(null);
+            mockRepository.findOneBy.mockResolvedValueOnce(null);
+            mockCrypto.createHash.mockReturnValueOnce(null);
 
             const result = await service.create(MOCK_CREATE_USER_DTO);
 
@@ -90,13 +80,9 @@ describe('UserService', () => {
         });
 
         it('should create a user succesfully', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-            const spySave = jest.spyOn(mockRepository, 'save');
-            const spyCreateHash = jest.spyOn(mockCrypto, 'createHash');
-
-            spyFindOneBy.mockResolvedValueOnce(null);
-            spyCreateHash.mockReturnValueOnce('hash');
-            spySave.mockResolvedValue(MOCK_CREATE_USER_DTO);
+            mockRepository.findOneBy.mockResolvedValueOnce(null);
+            mockCrypto.createHash.mockReturnValueOnce('hash');
+            mockRepository.save.mockResolvedValue(MOCK_CREATE_USER_DTO);
 
             const result = await service.create(MOCK_CREATE_USER_DTO);
 
@@ -111,9 +97,7 @@ describe('UserService', () => {
 
     describe('authenticate', () => {
         it('should return UNEXPECTED_EXCEPTION', async () => {
-            const spyFindOne = jest.spyOn(mockRepository, 'findOne');
-
-            spyFindOne.mockRejectedValueOnce('error');
+            mockRepository.findOne.mockRejectedValueOnce('error');
 
             const result = await service.authenticate(
                 MOCK_AUTH_USER_DTO.username,
@@ -128,9 +112,7 @@ describe('UserService', () => {
         });
 
         it('should return BAD_USERNAME', async () => {
-            const spyFindOne = jest.spyOn(mockRepository, 'findOne');
-
-            spyFindOne.mockResolvedValueOnce(null);
+            mockRepository.findOne.mockResolvedValueOnce(null);
 
             const result = await service.authenticate(
                 MOCK_AUTH_USER_DTO.username,
@@ -145,11 +127,8 @@ describe('UserService', () => {
         });
 
         it('should return BAD_PASSWORD', async () => {
-            const spyFindOne = jest.spyOn(mockRepository, 'findOne');
-            const spyCompareHash = jest.spyOn(mockCrypto, 'compareHash');
-
-            spyFindOne.mockResolvedValueOnce({});
-            spyCompareHash.mockReturnValueOnce(false);
+            mockRepository.findOne.mockResolvedValueOnce({});
+            mockCrypto.compareHash.mockReturnValueOnce(false);
 
             const result = await service.authenticate(
                 MOCK_AUTH_USER_DTO.username,
@@ -164,13 +143,9 @@ describe('UserService', () => {
         });
 
         it('should auth user successfully', async () => {
-            const spyFindOne = jest.spyOn(mockRepository, 'findOne');
-            const spyCompareHash = jest.spyOn(mockCrypto, 'compareHash');
-            const spyCreateToken = jest.spyOn(mockSession, 'createToken');
-
-            spyFindOne.mockResolvedValueOnce({});
-            spyCompareHash.mockReturnValueOnce(true);
-            spyCreateToken.mockReturnValueOnce('token');
+            mockRepository.findOne.mockResolvedValueOnce({});
+            mockCrypto.compareHash.mockReturnValueOnce(true);
+            mockSession.createToken.mockReturnValueOnce('token');
 
             const result = await service.authenticate(
                 MOCK_AUTH_USER_DTO.username,
@@ -186,9 +161,7 @@ describe('UserService', () => {
 
     describe('findOne', () => {
         it('should return UNEXPECTED_EXCEPTION', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-
-            spyFindOneBy.mockRejectedValueOnce('error');
+            mockRepository.findOneBy.mockRejectedValueOnce('error');
 
             const result = await service.findOne('');
 
@@ -200,9 +173,7 @@ describe('UserService', () => {
         });
 
         it('should return RESOURCE_NOT_FOUND', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-
-            spyFindOneBy.mockResolvedValueOnce(null);
+            mockRepository.findOneBy.mockResolvedValueOnce(null);
 
             const result = await service.findOne('id');
 
@@ -214,9 +185,7 @@ describe('UserService', () => {
         });
 
         it('should find user successfully', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-
-            spyFindOneBy.mockResolvedValueOnce({});
+            mockRepository.findOneBy.mockResolvedValueOnce({});
 
             const result = await service.findOne('id');
 
@@ -229,9 +198,7 @@ describe('UserService', () => {
 
     describe('update', () => {
         it('should return UNEXPECTED_EXCEPTION', async () => {
-            const spyUpdate = jest.spyOn(mockRepository, 'update');
-
-            spyUpdate.mockRejectedValueOnce('error');
+            mockRepository.update.mockRejectedValueOnce('error');
 
             const result = await service.update('id', MOCK_CREATE_USER_DTO);
 
@@ -243,9 +210,7 @@ describe('UserService', () => {
         });
 
         it('should return RESOURCE_NOT_FOUND', async () => {
-            const spyUpdate = jest.spyOn(mockRepository, 'update');
-
-            spyUpdate.mockResolvedValueOnce({ affected: 0 });
+            mockRepository.update.mockResolvedValueOnce({ affected: 0 });
 
             const result = await service.update('id', MOCK_CREATE_USER_DTO);
 
@@ -257,11 +222,8 @@ describe('UserService', () => {
         });
 
         it('should update a user succesfully', async () => {
-            const spyUpdate = jest.spyOn(mockRepository, 'update');
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-
-            spyUpdate.mockResolvedValueOnce({ affected: 1 });
-            spyFindOneBy.mockResolvedValueOnce({});
+            mockRepository.update.mockResolvedValueOnce({ affected: 1 });
+            mockRepository.findOneBy.mockResolvedValueOnce({});
 
             const result = await service.update('id', MOCK_CREATE_USER_DTO);
 
@@ -274,9 +236,7 @@ describe('UserService', () => {
 
     describe('delete', () => {
         it('should return UNEXPECTED_EXCEPTION', async () => {
-            const spyDelete = jest.spyOn(mockRepository, 'delete');
-
-            spyDelete.mockRejectedValueOnce('error');
+            mockRepository.delete.mockRejectedValueOnce('error');
 
             const result = await service.remove('id');
 
@@ -288,9 +248,7 @@ describe('UserService', () => {
         });
 
         it('should return RESOURCE_NOT_FOUND', async () => {
-            const spyDelete = jest.spyOn(mockRepository, 'delete');
-
-            spyDelete.mockResolvedValueOnce({ affected: 0 });
+            mockRepository.delete.mockResolvedValueOnce({ affected: 0 });
 
             const result = await service.remove('id');
 
@@ -302,9 +260,7 @@ describe('UserService', () => {
         });
 
         it('should delete user successfully', async () => {
-            const spyDelete = jest.spyOn(mockRepository, 'delete');
-
-            spyDelete.mockResolvedValueOnce({ affected: 1 });
+            mockRepository.delete.mockResolvedValueOnce({ affected: 1 });
 
             const result = await service.remove('id');
 

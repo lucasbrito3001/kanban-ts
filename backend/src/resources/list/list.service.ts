@@ -22,9 +22,15 @@ export class ListService {
     async create(createListDto: CreateListDto): Promise<ResponseFormat<List>> {
         try {
             const { name, position } = createListDto;
+
             const board = await this.boardRepository.findOneBy({
                 id: createListDto.boardId,
             });
+
+            if (board === null)
+                return this.responseService.formatError(
+                    ErrorTypes.BAD_RELATIONSHIP,
+                );
 
             const list = await this.listRepository.save({
                 name,

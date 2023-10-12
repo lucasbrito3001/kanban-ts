@@ -43,14 +43,23 @@ export class BoardMemberService {
                     ErrorTypes.DUPLICATED_KEY,
                 );
 
+            const user = await this.userRepository.findOneBy({
+                id: userId,
+            });
+
+            const board = await this.boardRepository.findOneBy({
+                id: createBoardMemberDto.boardId,
+            });
+
+            if (user === null || board === null)
+                return this.responseService.formatError(
+                    ErrorTypes.BAD_RELATIONSHIP,
+                );
+
             const member = await this.boardMemberRepository.save({
                 role: createBoardMemberDto.role,
-                user: await this.userRepository.findOneBy({
-                    id: userId,
-                }),
-                board: await this.boardRepository.findOneBy({
-                    id: createBoardMemberDto.boardId,
-                }),
+                user,
+                board,
             });
 
             return this.responseService.formatSuccess(member);
@@ -62,9 +71,7 @@ export class BoardMemberService {
         }
     }
 
-    async findByBoard(
-        boardId: string,
-    ): Promise<ResponseFormat<BoardMember[]>> {
+    async findByBoard(boardId: string): Promise<ResponseFormat<BoardMember[]>> {
         try {
             const boardMembers = await this.boardMemberRepository.findBy({
                 board: {

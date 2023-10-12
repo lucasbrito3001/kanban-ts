@@ -19,6 +19,7 @@ import { AuthGuard } from '@/guards/auth/auth.guard';
 import { JwtPayload } from '@/decorator/jwt-payload/jwt-payload.decorator';
 import { JwtPayload as JwtLibPayload } from 'jsonwebtoken';
 import { ListService } from '../list/list.service';
+import { CardService } from '../card/card.service';
 
 @Controller('board')
 @UseGuards(AuthGuard)
@@ -27,6 +28,7 @@ export class BoardController {
         private readonly boardService: BoardService,
         private readonly boardMemberService: BoardMemberService,
         private readonly listService: ListService,
+        private readonly cardService: CardService,
         private readonly errorHandlerService: ErrorHandlerService,
     ) {}
 
@@ -64,32 +66,25 @@ export class BoardController {
                 board.error,
             );
 
-        const members = await this.boardMemberService.findByBoard(
-            board.content.id,
-        );
+        const [members, lists, cards] = await Promise.all([
+            this.boardMemberService.findByBoard(board.content.id),
+            this.listService.findByBoard(board.content.id),
+            this.cardService.findByBoard(board.content.id),
+        ]);
 
-        console.log(members)
-
-        if (!members.status)
+        if ((!members.status || !lists.status || !cards.status) === null)
             return this.errorHandlerService.throwError(
-                members.errorType,
-                members.error,
-            );
-
-        const lists = await this.listService.findByBoard(board.content.id);
-
-        if (!lists.status)
-            return this.errorHandlerService.throwError(
-                lists.errorType,
-                lists.error,
+                members.errorType || lists.errorType || cards.errorType,
+                members.error || lists.error || cards.error,
             );
 
         return {
             statusCode: HttpStatus.OK,
             content: {
-                ...board,
-                lists,
-                members,
+                ...board.content,
+                lists: lists.content,
+                members: members.content,
+                cards: cards.content,
             },
         };
     }

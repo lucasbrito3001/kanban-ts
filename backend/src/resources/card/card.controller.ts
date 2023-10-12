@@ -1,34 +1,72 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Put,
+    Param,
+    Delete,
+    HttpStatus,
+} from '@nestjs/common';
 import { CardService } from './card.service';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
+import { ErrorHandlerService } from '@/utils/error-handler/error-handler.service';
 
 @Controller('card')
 export class CardController {
-  constructor(private readonly cardService: CardService) {}
+    constructor(
+        private readonly cardService: CardService,
+        private readonly errorHandlerService: ErrorHandlerService,
+    ) {}
 
-  @Post()
-  create(@Body() createCardDto: CreateCardDto) {
-    return this.cardService.create(createCardDto);
-  }
+    @Post()
+    async create(@Body() createCardDto: CreateCardDto) {
+        const { status, content, errorType, error } =
+            await this.cardService.create(createCardDto);
 
-  @Get()
-  findAll() {
-    return this.cardService.findAll();
-  }
+        if (!status)
+            return this.errorHandlerService.throwError(errorType, error);
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cardService.findOne(+id);
-  }
+        return { statusCode: HttpStatus.CREATED, content };
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto) {
-    return this.cardService.update(+id, updateCardDto);
-  }
+    // @Post('suggestions')
+    // createSuggestionsAI(@Body('prompt') prompt: string) {
+    //     return prompt;
+    // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cardService.remove(+id);
-  }
+    // @Get()
+    // findAll() {
+    //   return this.cardService.findAll();
+    // }
+
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.cardService.findOne(+id);
+    }
+
+    @Put(':id')
+    async update(
+        @Param('id') id: string,
+        @Body() updateCardDto: UpdateCardDto,
+    ) {
+        const { status, content, errorType, error } =
+            await this.cardService.update(id, updateCardDto);
+
+        if (!status)
+            return this.errorHandlerService.throwError(errorType, error);
+
+        return { statusCode: HttpStatus.OK, content };
+    }
+
+    @Delete(':id')
+    async remove(@Param('id') id: string) {
+        const { status, content, errorType, error } =
+            await this.cardService.remove(id);
+
+        if (!status) this.errorHandlerService.throwError(errorType, error);
+
+        return { statusCode: HttpStatus.OK, content };
+    }
 }

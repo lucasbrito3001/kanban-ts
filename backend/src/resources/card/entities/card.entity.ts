@@ -1,4 +1,4 @@
-import { Board } from '@/resources/board/entities/board.entity';
+import { List } from '@/resources/list/entities/list.entity';
 import {
     Column,
     CreateDateColumn,
@@ -35,9 +35,9 @@ export class Card {
     @UpdateDateColumn()
     public updatedAt: Date;
 
-    @ManyToOne(() => Board, (board) => board.cards, {
+    @ManyToOne(() => List, (list) => list.cards, {
         nullable: false,
     })
-    @JoinColumn({ name: 'boardId' })
-    public board!: Board;
+    @JoinColumn({ name: 'listId' })
+    public list!: List;
 }

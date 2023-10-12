@@ -8,6 +8,7 @@ import { compare, hash } from 'bcrypt';
 import { LoggerService } from './logger/logger.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ErrorHandlerService } from './error-handler/error-handler.service';
+import { AiService } from './ai/ai.service';
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { ErrorHandlerService } from './error-handler/error-handler.service';
         ResponseService,
         ErrorHandlerService,
         LoggerService,
+        AiService,
         Logger,
         {
             provide: 'HASH_ROUNDS',
@@ -43,6 +45,7 @@ import { ErrorHandlerService } from './error-handler/error-handler.service';
         ResponseService,
         LoggerService,
         ErrorHandlerService,
+        AiService,
     ],
 })
 export class UtilsModule {}

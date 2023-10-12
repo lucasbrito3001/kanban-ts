@@ -7,6 +7,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { BoardMember } from '../entities/board-member.entity';
 import { User } from '@/resources/user/entities/user.entity';
 import { MOCK_CREATE_MEMBER_DTO } from '../dto/create-board-member.dto';
+import { ErrorTypes } from '@/constants';
 
 describe('BoardMemberService', () => {
     let service: BoardMemberService;
@@ -35,15 +36,12 @@ describe('BoardMemberService', () => {
     });
 
     afterEach(() => {
-        Object.keys(mockRepository).forEach((key) => {
-            mockRepository[key].mockRestore();
-        });
+        jest.restoreAllMocks();
     });
 
     describe('create', () => {
         it('should return UNEXPECTED_EXCEPTION when throw any unhandled error', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-            spyFindOneBy.mockRejectedValueOnce('error');
+            mockRepository.findOneBy.mockRejectedValueOnce('error');
 
             const result = await service.create(
                 '00000000-0000-0000-0000-000000000000',
@@ -58,8 +56,7 @@ describe('BoardMemberService', () => {
         });
 
         it('should return DUPLICATED_KEY when try to create a user that already exists', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-            spyFindOneBy.mockResolvedValueOnce({} as Board);
+            mockRepository.findOneBy.mockResolvedValueOnce({} as Board);
 
             const result = await service.create(
                 '00000000-0000-0000-0000-000000000000',
@@ -73,12 +70,26 @@ describe('BoardMemberService', () => {
             });
         });
 
-        it('should create board successfully', async () => {
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-            const spySave = jest.spyOn(mockRepository, 'save');
+        it('should return BAD_RELATIONSHIP when the user or board not exists', async () => {
+            mockRepository.findOneBy.mockResolvedValue(null);
 
-            spyFindOneBy.mockResolvedValueOnce(null);
-            spySave.mockResolvedValueOnce({ mock: 'mock' });
+            const result = await service.create(
+                '00000000-0000-0000-0000-000000000000',
+                MOCK_CREATE_MEMBER_DTO,
+            );
+
+            expect(result).toStrictEqual({
+                status: false,
+                errorType: ErrorTypes.BAD_RELATIONSHIP,
+                error: undefined,
+            });
+        });
+
+        it('should create board successfully', async () => {
+            mockRepository.findOneBy
+                .mockResolvedValue({})
+                .mockResolvedValueOnce(null);
+            mockRepository.save.mockResolvedValueOnce({ mock: 'mock' });
 
             const result = await service.create(
                 '00000000-0000-0000-0000-000000000000',
@@ -94,8 +105,7 @@ describe('BoardMemberService', () => {
 
     describe('findByBoard', () => {
         it('should return UNEXPECTED_EXCEPTION when throw any unhandled error', async () => {
-            const spyFindBy = jest.spyOn(mockRepository, 'findBy');
-            spyFindBy.mockRejectedValueOnce('error');
+            mockRepository.findBy.mockRejectedValueOnce('error');
 
             const result = await service.findByBoard(
                 '00000000-0000-0000-0000-000000000000',
@@ -109,8 +119,7 @@ describe('BoardMemberService', () => {
         });
 
         it('should return RESOURCE_NOT_FOUND when have no members in the board', async () => {
-            const spyFindBy = jest.spyOn(mockRepository, 'findBy');
-            spyFindBy.mockResolvedValueOnce([]);
+            mockRepository.findBy.mockResolvedValueOnce([]);
 
             const result = await service.findByBoard(
                 '00000000-0000-0000-0000-000000000000',
@@ -124,8 +133,7 @@ describe('BoardMemberService', () => {
         });
 
         it('should read board members successfully', async () => {
-            const spyFindBy = jest.spyOn(mockRepository, 'findBy');
-            spyFindBy.mockResolvedValueOnce([{ mock: 'mock' }]);
+            mockRepository.findBy.mockResolvedValueOnce([{ mock: 'mock' }]);
 
             const result = await service.findByBoard(
                 '00000000-0000-0000-0000-000000000000',
@@ -140,9 +148,7 @@ describe('BoardMemberService', () => {
 
     describe('update', () => {
         it('should return UNEXPECTED_EXCEPTION when throw any unhandled error', async () => {
-            const spyUpdate = jest.spyOn(mockRepository, 'update');
-
-            spyUpdate.mockRejectedValueOnce('error');
+            mockRepository.update.mockRejectedValueOnce('error');
 
             const result = await service.update('id', MOCK_CREATE_MEMBER_DTO);
 
@@ -154,9 +160,7 @@ describe('BoardMemberService', () => {
         });
 
         it('should return RESOURCE_NOT_FOUND when affect 0 boards', async () => {
-            const spyUpdate = jest.spyOn(mockRepository, 'update');
-
-            spyUpdate.mockResolvedValueOnce({ affected: 0 });
+            mockRepository.update.mockResolvedValueOnce({ affected: 0 });
 
             const result = await service.update('id', MOCK_CREATE_MEMBER_DTO);
 
@@ -168,11 +172,8 @@ describe('BoardMemberService', () => {
         });
 
         it('should update a board successfully', async () => {
-            const spyUpdate = jest.spyOn(mockRepository, 'update');
-            const spyFindOneBy = jest.spyOn(mockRepository, 'findOneBy');
-
-            spyUpdate.mockResolvedValueOnce({ affected: 1 });
-            spyFindOneBy.mockResolvedValueOnce({});
+            mockRepository.update.mockResolvedValueOnce({ affected: 1 });
+            mockRepository.findOneBy.mockResolvedValueOnce({});
 
             const result = await service.update('id', MOCK_CREATE_MEMBER_DTO);
 
@@ -185,9 +186,7 @@ describe('BoardMemberService', () => {
 
     describe('delete', () => {
         it('should return UNEXPECTED_EXCEPTION when throw any unhandled error', async () => {
-            const spyDelete = jest.spyOn(mockRepository, 'delete');
-
-            spyDelete.mockRejectedValueOnce('error');
+            mockRepository.delete.mockRejectedValueOnce('error');
 
             const result = await service.remove('id');
 
@@ -199,9 +198,7 @@ describe('BoardMemberService', () => {
         });
 
         it('should return RESOURCE_NOT_FOUND when affect 0 boards', async () => {
-            const spyDelete = jest.spyOn(mockRepository, 'delete');
-
-            spyDelete.mockResolvedValueOnce({ affected: 0 });
+            mockRepository.delete.mockResolvedValueOnce({ affected: 0 });
 
             const result = await service.remove('id');
 
@@ -213,9 +210,7 @@ describe('BoardMemberService', () => {
         });
 
         it('should delete a board successfully', async () => {
-            const spyDelete = jest.spyOn(mockRepository, 'delete');
-
-            spyDelete.mockResolvedValueOnce({ affected: 1 });
+            mockRepository.delete.mockResolvedValueOnce({ affected: 1 });
 
             const result = await service.remove('id');
 
