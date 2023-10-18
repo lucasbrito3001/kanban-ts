@@ -1,6 +1,6 @@
 "use client";
-import { ReactNode, useState } from "react";
-import BoardCard from "./components/board-card";
+import { useState } from "react";
+import BoardCard from "../../components/board-card";
 
 export type Board = {
 	name: string;
