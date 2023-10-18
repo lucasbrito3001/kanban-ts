@@ -1,34 +1,92 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    HttpCode,
+    HttpException,
+    HttpStatus,
+    UsePipes,
+    Put,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto, createUserDtoSchema } from './dto/create-user.dto';
+import { UpdateUserDto, updateUserDtoSchema } from './dto/update-user.dto';
+import { SERVICE_ERRORS_DICT } from '@/constants';
+import { LoggerService } from '@/utils/logger/logger.service';
+import { ErrorHandlerService } from '@/utils/error-handler/error-handler.service';
+import { AuthUserDto, authUserDtoSchema } from './dto/auth-user.dto';
+import { SchemaValidationPipe } from '@/pipes/schema/schema.pipe';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+    constructor(
+        private readonly userService: UserService,
+        private readonly errorHandlerService: ErrorHandlerService,
+    ) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
+    @Post()
+    @HttpCode(HttpStatus.CREATED)
+    async create(
+        @Body(new SchemaValidationPipe(createUserDtoSchema))
+        createUserDto: CreateUserDto,
+    ) {
+        const { status, content, errorType, error } =
+            await this.userService.create(createUserDto);
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
+        if (!status) this.errorHandlerService.throwError(errorType, error);
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.userService.findOne(+id);
-  // }
+        return { statusCode: HttpStatus.CREATED, content };
+    }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
+    @Post('auth')
+    @UsePipes(new SchemaValidationPipe(authUserDtoSchema))
+    @HttpCode(HttpStatus.OK)
+    async login(@Body() authUserDto: AuthUserDto) {
+        const { username, password } = authUserDto;
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.userService.remove(+id);
-  // }
+        const { status, content, errorType, error } =
+            await this.userService.authenticate(username, password);
+
+        if (!status) this.errorHandlerService.throwError(errorType, error);
+
+        return { statusCode: HttpStatus.OK, content };
+    }
+
+    @Get(':id')
+    async findOne(@Param('id') id: string) {
+        const { status, content, errorType, error } =
+            await this.userService.findOne(id);
+
+        if (!status) this.errorHandlerService.throwError(errorType, error);
+
+        return { statusCode: HttpStatus.OK, content };
+    }
+
+    @Put(':id')
+    async update(
+        @Param('id') id: string,
+        @Body(new SchemaValidationPipe(updateUserDtoSchema))
+        updateUserDto: UpdateUserDto,
+    ) {
+        const { status, content, errorType, error } =
+            await this.userService.update(id, updateUserDto);
+
+        if (!status) this.errorHandlerService.throwError(errorType, error);
+
+        return { statusCode: HttpStatus.OK, content };
+    }
+
+    @Delete(':id')
+    async remove(@Param('id') id: string) {
+        const { status, content, errorType, error } =
+            await this.userService.remove(id);
+
+        if (!status) this.errorHandlerService.throwError(errorType, error);
+
+        return { statusCode: HttpStatus.OK, content };
+    }
 }

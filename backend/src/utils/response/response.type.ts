@@ -1,10 +1,11 @@
 export type ResponseFormat<T = any, K = any> = {
     status: boolean
     content?: T
+    errorType?: string
     error?: K
 }
 
 export interface IResponseService {
-    formatSuccess(status: boolean, content: any): ResponseFormat
-    formatError(status: boolean, error: any): ResponseFormat
+    formatSuccess(content: any): ResponseFormat
+    formatError(errorType: string, error?: any): ResponseFormat
 }

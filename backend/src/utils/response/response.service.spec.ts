@@ -18,7 +18,7 @@ describe('ResponseService', () => {
     });
 
     it('should return status and error', () => {
-        const response = service.formatError({ foo: 'bar' });
+        const response = service.formatError('MOCK', { foo: 'bar' });
         expect(response).toEqual({ status: false, error: { foo: 'bar' } });
     });
 });

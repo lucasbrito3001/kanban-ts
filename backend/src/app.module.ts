@@ -8,8 +8,12 @@ import { ResponseService } from './utils/response/response.service';
 import { UtilsModule } from './utils/utils.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from './database/datasource';
+import { ConfigModule } from '@nestjs/config';
+import { CardModule } from './resources/card/card.module';
+import { ListModule } from './resources/list/list.module';
+import { TagModule } from './resources/tag/tag.module';
 
-const DB_CONFIG_OPTIONS = new DataSource().getConfig(process.env.NODE_ENV)
+const DB_CONFIG_OPTIONS = new DataSource().getConfig(process.env.NODE_ENV);
 
 @Module({
     imports: [
@@ -17,9 +21,12 @@ const DB_CONFIG_OPTIONS = new DataSource().getConfig(process.env.NODE_ENV)
         BoardModule,
         BoardMemberModule,
         UtilsModule,
-        TypeOrmModule.forRoot(DB_CONFIG_OPTIONS)
+        TypeOrmModule.forRoot(DB_CONFIG_OPTIONS),
+        ConfigModule.forRoot({ isGlobal: true }),
+        CardModule,
+        ListModule,
+        TagModule,
     ],
     controllers: [],
-    providers: [CryptoService, SessionService, ResponseService],
 })
-export class AppModule { }
+export class AppModule {}

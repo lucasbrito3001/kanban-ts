@@ -1,16 +1,19 @@
 import * as Joi from 'joi';
-import { VALID_ROLES } from '../entities/board-member.entity';
+import { ValidRoles } from '../entities/board-member.entity';
 
 export class CreateBoardMemberDto {
     public boardId: string;
-    public userId: string;
     public role: string;
 }
 
-export const boardMemberDtoSchema = Joi.object({
-    boardId: Joi.string().alphanum().uuid().required(),
-    userId: Joi.string().alphanum().uuid().required(),
+export const createBoardMemberDtoSchema = Joi.object({
+    boardId: Joi.string().uuid().required(),
     role: Joi.string()
-        .valid(...VALID_ROLES)
+        .valid(...Object.values(ValidRoles))
         .required(),
 });
+
+export const MOCK_CREATE_MEMBER_DTO = {
+    boardId: '00000000-0000-0000-0000-000000000000',
+    role: 'reader'
+}

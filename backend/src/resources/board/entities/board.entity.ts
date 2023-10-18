@@ -1,33 +1,43 @@
-import * as Joi from "joi";
+import * as Joi from 'joi';
 import {
-	Entity,
-	PrimaryGeneratedColumn,
-	Column,
-	OneToMany,
-} from "typeorm";
-import { BoardMember } from "@/resources/board-member/entities/board-member.entity";
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    OneToMany,
+    CreateDateColumn,
+    UpdateDateColumn,
+    JoinColumn,
+} from 'typeorm';
+import { BoardMember } from '@/resources/board-member/entities/board-member.entity';
+import { List } from '@/resources/list/entities/list.entity';
 
-@Entity({ name: "board" })
+@Entity({ name: 'board' })
 export class Board {
-	@PrimaryGeneratedColumn("uuid")
-	id!: string;
+    @PrimaryGeneratedColumn('uuid')
+    id!: string;
 
-	@Column({ unique: true, nullable: false })
-	name!: string;
+    @Column({ unique: true, nullable: false })
+    name!: string;
 
-	@Column({ length: 7, nullable: false })
-	bgColor!: string;
+    @Column({ length: 7, nullable: false })
+    bgColor!: string;
 
-	@OneToMany(() => BoardMember, (boardMember) => boardMember.board)
-	public boardMembers!: BoardMember[];
+    @CreateDateColumn()
+    public createdAt: Date;
+
+    @UpdateDateColumn()
+    public updatedAt: Date;
+
+    @OneToMany(() => BoardMember, (boardMember) => boardMember.board)
+    @JoinColumn()
+    public members!: BoardMember[];
+
+    @OneToMany(() => List, (list) => list.board)
+    @JoinColumn()
+    public lists!: List[];
 }
 
 export type BoardDto = {
-	name: string;
-	bgColor: string;
+    name: string;
+    bgColor: string;
 };
-
-export const boardDtoSchema = Joi.object({
-	name: Joi.string().alphanum().max(48).required(),
-	bgColor: Joi.string().alphanum().length(7).required(),
-});
