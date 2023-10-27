@@ -1,14 +1,12 @@
 import { FieldValues, Path, UseFormRegister } from "react-hook-form";
-import { Types } from "../types";
+import InputText from "./text";
 
-export default function InputText<TFieldValues extends FieldValues>({
-	type,
+export default function InputColor<TFieldValues extends FieldValues>({
 	key,
 	placeholder,
 	labelTarget,
 	reactHookFormRegister,
 }: {
-	type?: Types;
 	key: Path<TFieldValues>;
 	placeholder: string;
 	labelTarget: string;
@@ -16,9 +14,9 @@ export default function InputText<TFieldValues extends FieldValues>({
 }) {
 	return (
 		<input
-			className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+			className="shadow appearance-none border rounded text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
 			id={labelTarget}
-			type={type || "text"}
+			type="color"
 			placeholder={placeholder}
 			{...reactHookFormRegister(key)}
 		></input>

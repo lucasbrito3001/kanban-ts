@@ -1,36 +1,27 @@
 import { Field } from "@/components/form/types";
 import { z } from "zod";
 
-export const SIGN_IN_FORM_FIELDS: Field[] = [
-	{
-		key: "firstName",
-		type: "text",
-		label: "First name",
-		placeholder: "ex: Sammy",
-	},
-	{
-		key: "lastName",
-		type: "text",
-		label: "Last name",
-		placeholder: "ex: Smith",
-	},
+export type SignInFormInputs = {
+	username: string;
+	password: string;
+};
+
+export const SIGN_IN_FORM_FIELDS: Field<SignInFormInputs>[] = [
 	{
 		key: "username",
 		type: "text",
 		label: "Username",
-		placeholder: "ex: s4mmysm1th",
+		placeholder: "type your username",
 	},
 	{
 		key: "password",
 		type: "password",
 		label: "Password",
-		placeholder: "type a strong password",
+		placeholder: "type your password",
 	},
 ];
 
 export const SIGN_IN_FORM_FIELDS_SCHEMA = z.object({
-	firstName: z.string(),
-	lastName: z.string(),
-	username: z.string().min(6),
-	password: z.string().min(8),
+	username: z.string().min(6, "Username must contain at least 6 characters"),
+	password: z.string().min(8, "Password must contain at least 8 characters"),
 });
