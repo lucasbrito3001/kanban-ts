@@ -2,61 +2,55 @@
 import DynamicForm from "@/components/form";
 import React, { useEffect } from "react";
 import {
-	SIGN_IN_FORM_FIELDS,
-	SIGN_IN_FORM_FIELDS_SCHEMA,
-	SignInFormInputs,
+	SIGN_UP_FORM_FIELDS,
+	SIGN_UP_FORM_FIELDS_SCHEMA,
+	SignUpFormInputs,
 } from "./constants";
 import { SubmitHandler } from "react-hook-form";
 import { useRequest } from "@/hooks/use-request/index";
 import { toast } from "react-toastify";
 import { redirect } from "next/navigation";
-import { storeToken } from "@/services/session";
 
-const TOAST_MESSAGES = {
-	SUCCESS: "Authenticated successfully, redirecting to dashboard...",
+const ERRORS_MESSAGES = {
 	INVALID_DTO: "Invalid values, please check and try again.",
-	BAD_USERNAME: "Bad credentials, please try again.",
-	BAD_PASSWORD: "Bad credentials, please try again.",
+	DUPLICATED_KEY: "Username already in use.",
 };
 
-export default function SignIn() {
-	const [isLoadingSignIn, dataSignIn, errorsSignIn, createUser] = useRequest<
+export default function SignUp() {
+	const [isLoadingSignUp, dataSignUp, errorsSignUp, createUser] = useRequest<
 		string,
-		keyof typeof TOAST_MESSAGES
-	>("AUTH_USER");
+		keyof typeof ERRORS_MESSAGES
+	>("CREATE_USER");
 
 	useEffect(() => {
-		if (dataSignIn !== null) {
-			toast(TOAST_MESSAGES["SUCCESS"], {
+		if (dataSignUp !== null) {
+			toast("Registered succesfully, redirecting to sign in page...", {
 				type: "success",
 			});
-
-			storeToken(dataSignIn);
-
-			redirect("/dashboard");
+			redirect("/user/sign-in");
 		}
 
-		if (errorsSignIn !== null)
-			toast(TOAST_MESSAGES[errorsSignIn], {
+		if (errorsSignUp !== null)
+			toast(ERRORS_MESSAGES[errorsSignUp], {
 				type: "error",
 			});
-	}, [dataSignIn, errorsSignIn]);
+	}, [dataSignUp, errorsSignUp]);
 
-	const signIn: SubmitHandler<SignInFormInputs> = async (
-		userInfos: SignInFormInputs
+	const signUp: SubmitHandler<SignUpFormInputs> = async (
+		userInfos: SignUpFormInputs
 	) => {
 		await createUser({ data: userInfos });
 	};
 
 	const renderForm = () => {
-		return DynamicForm<SignInFormInputs>({
-			onSubmit: signIn,
-			buttonText: "Enter",
-			fields: SIGN_IN_FORM_FIELDS,
-			schema: SIGN_IN_FORM_FIELDS_SCHEMA,
-			isLoading: isLoadingSignIn,
+		return DynamicForm<SignUpFormInputs>({
+			onSubmit: signUp,
+			buttonText: "Register",
+			fields: SIGN_UP_FORM_FIELDS,
+			schema: SIGN_UP_FORM_FIELDS_SCHEMA,
+			isLoading: isLoadingSignUp,
 			showButton: true,
-			formId: "signIn",
+			formId: "signUp"
 		});
 	};
 
