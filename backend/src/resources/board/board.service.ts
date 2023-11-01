@@ -51,6 +51,8 @@ export class BoardService implements IBoardService {
                 relations: ['board'],
             });
 
+            console.log(boards)
+
             if (boards.length === 0)
                 return this.responseService.formatError(
                     ErrorTypes.RESOURCE_NOT_FOUND,

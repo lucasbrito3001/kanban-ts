@@ -6,7 +6,7 @@ export class CreateBoardDto {
 }
 
 export const createBoardDtoSchema = Joi.object({
-    name: Joi.string().alphanum().max(48).required(),
+    name: Joi.string().max(48).required(),
     bgColor: Joi.string().alphanum().length(6).required(),
 });
 

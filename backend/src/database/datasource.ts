@@ -1,6 +1,3 @@
-import { BoardMember } from '@/resources/board-member/entities/board-member.entity';
-import { Board } from '@/resources/board/entities/board.entity';
-import { User } from '@/resources/user/entities/user.entity';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { join } from 'path';
 
@@ -13,7 +10,7 @@ export class DataSource {
         password: 'root',
         database: 'kanban',
         synchronize: true,
-        logging: true,
+        logging: false,
         entities: [
             join(__dirname, '../resources/**/entities/*.entity{.js, .ts}'),
         ],
