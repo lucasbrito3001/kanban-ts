@@ -29,7 +29,7 @@ export const useRequest = <T, K>(type: requests): generalReturn<T, K> => {
 			const response = await api_gateway.request({
 				url,
 				method,
-				// ...(token && { heaers: { authorization: token } }),
+				...(token && { headers: { Authorization: `Bearer ${token}` } }),
 				...requestOptions,
 			});
 			setData(response.data.content);

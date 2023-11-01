@@ -7,35 +7,72 @@ import { FaPlus } from "react-icons/fa";
 import DynamicForm from "@/components/form";
 import {
 	Board,
+	BoardMember,
 	CREATE_BOARD_FORM_FIELDS,
 	CREATE_BOARD_FORM_FIELDS_SCHEMA,
 	CreateBoardFormInputs,
 } from "./constants";
 import { useRequest } from "@/hooks/use-request";
 import { SubmitHandler } from "react-hook-form";
+import { toast } from "react-toastify";
 
 const ERRORS_MESSAGES = {
-	INVALID_DTO: "Invalid values, please check and try again.",
-	DUPLICATED_KEY: "Username already in use.",
+	DUPLICATED_KEY: "Board name already in use.",
 };
 
 export default function Dashboard() {
 	const [isVisibleModal, setIsVisibleModal] = useState<boolean>(false);
-	const [isLoadingCreateBoard, dataSignUp, errorsSignUp, createBoard] =
-		useRequest<string, keyof typeof ERRORS_MESSAGES>("CREATE_BOARD");
+	const [
+		isLoadingCreateBoard,
+		dataCreateBoard,
+		errorsCreateBoard,
+		createBoard,
+	] = useRequest<string, keyof typeof ERRORS_MESSAGES>("CREATE_BOARD");
 	const [isLoadingGetBoards, dataGetBoards, errorsGetBoards, getBoards] =
-		useRequest<Board[], keyof typeof ERRORS_MESSAGES>("GET_BOARDS");
+		useRequest<BoardMember[], keyof typeof ERRORS_MESSAGES>("GET_BOARDS");
 
 	useEffect(() => {
-		getBoards({});
-	}, []);
+		const isRenderingScreen =
+			dataCreateBoard === null &&
+			errorsCreateBoard === null &&
+			!isLoadingCreateBoard;
+
+		if (dataCreateBoard !== null || isRenderingScreen) {
+			getBoards({});
+			hideModal();
+		}
+	}, [dataCreateBoard]);
+
+	useEffect(() => {
+		if (dataCreateBoard !== null) {
+			toast("Board created succesfully.", {
+				type: "success",
+			});
+		}
+
+		if (errorsCreateBoard !== null)
+			toast(
+				ERRORS_MESSAGES[errorsCreateBoard] ||
+					"An unexpected error occur, contact the administratr",
+				{
+					type: "error",
+				}
+			);
+	}, [dataCreateBoard, errorsCreateBoard]);
 
 	const showModal = () => setIsVisibleModal(true);
 	const hideModal = () => setIsVisibleModal(false);
 
 	const renderBoards = (): JSX.Element[] | undefined => {
-		return dataGetBoards?.map((board, idx) => {
-			return <BoardCard key={idx} name={board.name} bgColor={board.bgColor} />;
+		return dataGetBoards?.map(({ board }, idx) => {
+			return (
+				<BoardCard
+					key={idx}
+					id={board.id}
+					name={board.name}
+					bgColor={board.bgColor}
+				/>
+			);
 		});
 	};
 
@@ -54,6 +91,7 @@ export default function Dashboard() {
 			schema: CREATE_BOARD_FORM_FIELDS_SCHEMA,
 			isLoading: isLoadingCreateBoard,
 			showButton: false,
+			submitSuccessfully: !!dataCreateBoard && !errorsCreateBoard,
 			formId: "createBoard",
 		});
 	};

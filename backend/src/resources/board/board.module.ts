@@ -8,6 +8,7 @@ import { UtilsModule } from '@/utils/utils.module';
 import { ListModule } from '../list/list.module';
 import { BoardMemberModule } from '../board-member/board-member.module';
 import { CardModule } from '../card/card.module';
+import { BoardMemberService } from '../board-member/board-member.service';
 
 @Module({
     imports: [

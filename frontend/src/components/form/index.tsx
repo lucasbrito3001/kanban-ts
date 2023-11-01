@@ -9,6 +9,7 @@ import {
 	FieldValuesFromFieldErrors,
 } from "@hookform/error-message";
 import InputColor from "./inputs/color";
+import { useEffect } from "react";
 
 export default function DynamicForm<TFieldValues extends FieldValues>({
 	onSubmit,
@@ -18,14 +19,20 @@ export default function DynamicForm<TFieldValues extends FieldValues>({
 	isLoading,
 	showButton,
 	formId,
+	submitSuccessfully,
 }: DynamicFormProps<TFieldValues>) {
 	const {
 		register,
 		handleSubmit,
+		reset,
 		formState: { errors },
 	} = useForm<TFieldValues>({
 		resolver: zodResolver(schema),
 	});
+
+	useEffect(() => {
+		if (submitSuccessfully) reset();
+	}, [submitSuccessfully]);
 
 	const renderFields = (): JSX.Element[] => {
 		const inputsByType = {

@@ -4,7 +4,6 @@ export const TOKEN_NAME = "SESSION_TOKEN";
 
 export const storeToken = (token: string): void => {
 	localStorage.setItem(TOKEN_NAME, token);
-	api_gateway.defaults.headers.common["Authorization"] = "Bearer " + token;
 };
 
 export const getToken = (): string | null => {
