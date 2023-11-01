@@ -1,6 +1,12 @@
 import { Field } from "@/components/form/types";
 import { z } from "zod";
 
+export type Board = {
+	id: string;
+	name: string;
+	bgColor: string;
+};
+
 export type CreateBoardFormInputs = {
 	name: string;
 	bgColor: string;

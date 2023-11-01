@@ -2,6 +2,7 @@ import { api_gateway } from "@/services/api";
 import { AxiosRequestConfig } from "axios";
 import { useState } from "react";
 import { requests, requestsDict } from "./constants";
+import { getToken } from "@/services/session";
 
 type generalReturn<T, K> = [
 	boolean,
@@ -18,6 +19,8 @@ export const useRequest = <T, K>(type: requests): generalReturn<T, K> => {
 	const { url, method } = requestsDict[type];
 
 	const execute = async (requestOptions: AxiosRequestConfig) => {
+		const token = getToken();
+
 		setErrors(null);
 		setData(null);
 		setIsLoading(true);
@@ -26,6 +29,7 @@ export const useRequest = <T, K>(type: requests): generalReturn<T, K> => {
 			const response = await api_gateway.request({
 				url,
 				method,
+				// ...(token && { heaers: { authorization: token } }),
 				...requestOptions,
 			});
 			setData(response.data.content);
