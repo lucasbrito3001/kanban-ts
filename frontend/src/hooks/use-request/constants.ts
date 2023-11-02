@@ -1,6 +1,10 @@
 import { AxiosRequestConfig, Method } from "axios";
 
-export type requests = "CREATE_USER" | "AUTH_USER" | "CREATE_BOARD";
+export type requests =
+	| "CREATE_USER"
+	| "AUTH_USER"
+	| "CREATE_BOARD"
+	| "GET_BOARDS";
 
 type requestInfos = {
 	[key: string]: {
@@ -21,5 +25,9 @@ export const requestsDict: requestInfos = {
 	CREATE_BOARD: {
 		url: "/board",
 		method: "POST",
+	},
+	GET_BOARDS: {
+		url: "/board",
+		method: "GET",
 	},
 };

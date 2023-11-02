@@ -26,4 +26,5 @@ export type DynamicFormProps<T extends FieldValues> = {
 	isLoading: boolean;
 	showButton: boolean;
 	formId: string;
+	submitSuccessfully: boolean;
 };

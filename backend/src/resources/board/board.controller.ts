@@ -34,11 +34,12 @@ export class BoardController {
 
     @Post()
     async create(
+        @JwtPayload() jwtPayload: JwtLibPayload,
         @Body(new SchemaValidationPipe(createBoardDtoSchema))
         createBoardDto: CreateBoardDto,
     ) {
         const { status, content, errorType, error } =
-            await this.boardService.create(createBoardDto);
+            await this.boardService.create(jwtPayload.id, createBoardDto);
 
         if (!status) this.errorHandlerService.throwError(errorType, error);
 

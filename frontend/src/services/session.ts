@@ -1,12 +1,15 @@
 import { api_gateway } from "./api";
 
-const storeToken = (token: string): void => {
-	localStorage.setItem("SESSION_TOKEN", token);
-	api_gateway.defaults.headers.common["Authorization"] = "Bearer " + token;
+export const TOKEN_NAME = "SESSION_TOKEN";
+
+export const storeToken = (token: string): void => {
+	localStorage.setItem(TOKEN_NAME, token);
 };
 
-const deleteToken = () => {
-	localStorage.getItem("SESSION_TOKEN");
+export const getToken = (): string | null => {
+	return localStorage.getItem(TOKEN_NAME);
 };
 
-export { storeToken, deleteToken };
+export const deleteToken = (): void => {
+	localStorage.removeItem(TOKEN_NAME);
+};

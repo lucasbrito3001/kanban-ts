@@ -1,71 +1,85 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BoardCard from "../../components/board-card";
 import Container from "@/components/container";
 import Modal from "@/components/modal";
 import { FaPlus } from "react-icons/fa";
 import DynamicForm from "@/components/form";
 import {
+	Board,
+	BoardMember,
 	CREATE_BOARD_FORM_FIELDS,
 	CREATE_BOARD_FORM_FIELDS_SCHEMA,
 	CreateBoardFormInputs,
 } from "./constants";
 import { useRequest } from "@/hooks/use-request";
 import { SubmitHandler } from "react-hook-form";
-
-export type Board = {
-	name: string;
-	bgColor: string;
-};
+import { toast } from "react-toastify";
 
 const ERRORS_MESSAGES = {
-	INVALID_DTO: "Invalid values, please check and try again.",
-	DUPLICATED_KEY: "Username already in use.",
+	DUPLICATED_KEY: "Board name already in use.",
 };
 
 export default function Dashboard() {
 	const [isVisibleModal, setIsVisibleModal] = useState<boolean>(false);
-	const [isLoadingCreateBoard, dataSignUp, errorsSignUp, createBoard] =
-		useRequest<string, keyof typeof ERRORS_MESSAGES>("CREATE_BOARD");
-	const [boards, setBoards] = useState<Board[]>([
-		{ name: "SRE - DEVOPS", bgColor: "#ffa8fa" },
-		{ name: "Eng. Software", bgColor: "#87faa2" },
-		{ name: "Service Desk", bgColor: "#0c0c0c" },
-		{ name: "CORE 5.0", bgColor: "#c3c3c3" },
-		{ name: "Sustentação", bgColor: "#0c0c0c" },
-		{ name: "Legado Maithá", bgColor: "#12c1cf" },
-		{ name: "SRE - DEVOPS", bgColor: "#8745fc" },
-		{ name: "Eng. Software", bgColor: "#87faa2" },
-		{ name: "Service Desk", bgColor: "#0c0c0c" },
-		{ name: "CORE 5.0", bgColor: "#ffcc11" },
-		{ name: "Sustentação", bgColor: "#0c0c0c" },
-		{ name: "Legado Maithá", bgColor: "#12c1cf" },
-		{ name: "SRE - DEVOPS", bgColor: "#ffa8fa" },
-		{ name: "Eng. Software", bgColor: "#87faa2" },
-		{ name: "Service Desk", bgColor: "#0c0c0c" },
-		{ name: "CORE 5.0", bgColor: "#c3c3c3" },
-		{ name: "Sustentação", bgColor: "#0c0c0c" },
-		{ name: "Legado Maithá", bgColor: "#5f6712" },
-	]);
+	const [
+		isLoadingCreateBoard,
+		dataCreateBoard,
+		errorsCreateBoard,
+		createBoard,
+	] = useRequest<string, keyof typeof ERRORS_MESSAGES>("CREATE_BOARD");
+	const [isLoadingGetBoards, dataGetBoards, errorsGetBoards, getBoards] =
+		useRequest<BoardMember[], keyof typeof ERRORS_MESSAGES>("GET_BOARDS");
 
-	const showModal = () => {
-		setIsVisibleModal(true);
-	};
+	useEffect(() => {
+		const isRenderingScreen =
+			dataCreateBoard === null &&
+			errorsCreateBoard === null &&
+			!isLoadingCreateBoard;
 
-	const hideModal = () => {
-		setIsVisibleModal(false);
-	};
+		if (dataCreateBoard !== null || isRenderingScreen) {
+			getBoards({});
+			hideModal();
+		}
+	}, [dataCreateBoard]);
 
-	const renderBoards = (): JSX.Element[] => {
-		return boards.map((board, idx) => {
-			return <BoardCard key={idx} name={board.name} bgColor={board.bgColor} />;
+	useEffect(() => {
+		if (dataCreateBoard !== null) {
+			toast("Board created succesfully.", {
+				type: "success",
+			});
+		}
+
+		if (errorsCreateBoard !== null)
+			toast(
+				ERRORS_MESSAGES[errorsCreateBoard] ||
+					"An unexpected error occur, contact the administratr",
+				{
+					type: "error",
+				}
+			);
+	}, [dataCreateBoard, errorsCreateBoard]);
+
+	const showModal = () => setIsVisibleModal(true);
+	const hideModal = () => setIsVisibleModal(false);
+
+	const renderBoards = (): JSX.Element[] | undefined => {
+		return dataGetBoards?.map(({ board }, idx) => {
+			return (
+				<BoardCard
+					key={idx}
+					id={board.id}
+					name={board.name}
+					bgColor={board.bgColor}
+				/>
+			);
 		});
 	};
 
 	const create: SubmitHandler<CreateBoardFormInputs> = async (
 		userInfos: CreateBoardFormInputs
 	) => {
-		console.log(userInfos)
+		userInfos.bgColor = userInfos.bgColor.replace("#", "");
 		await createBoard({ data: userInfos });
 	};
 
@@ -77,6 +91,7 @@ export default function Dashboard() {
 			schema: CREATE_BOARD_FORM_FIELDS_SCHEMA,
 			isLoading: isLoadingCreateBoard,
 			showButton: false,
+			submitSuccessfully: !!dataCreateBoard && !errorsCreateBoard,
 			formId: "createBoard",
 		});
 	};
@@ -96,7 +111,10 @@ export default function Dashboard() {
 					</a>
 				</aside>
 				<main className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-					{renderBoards()}
+					{/* Rendering the boards */}
+					{isLoadingGetBoards ? "loading..." : renderBoards()}
+
+					{/* Last card with "+" to create a new board */}
 					<div className="grid cursor-pointer place-content-center transition-all transition-500 p-4 h-32 rounded-md border-4 border-dashed hover:bg-gray-100">
 						{" "}
 						<FaPlus size="2em" color="gray" className="mx-auto"></FaPlus>

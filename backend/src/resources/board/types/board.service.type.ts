@@ -4,7 +4,10 @@ import { Board } from '../entities/board.entity';
 import { UpdateBoardDto } from '../dto/update-board.dto';
 
 export interface IBoardService {
-    create(createBoardDto: CreateBoardDto): Promise<ResponseFormat<Board>>;
+    create(
+        userId: string,
+        createBoardDto: CreateBoardDto,
+    ): Promise<ResponseFormat<Board>>;
     findByUser(userId: string): Promise<ResponseFormat<Board[]>>;
     findOne(id: string): Promise<ResponseFormat<Board>>;
     update(

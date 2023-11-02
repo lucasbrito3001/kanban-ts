@@ -4,11 +4,15 @@ import { UpdateBoardDto } from './dto/update-board.dto';
 import { Repository } from 'typeorm';
 import { Board } from './entities/board.entity';
 import { ResponseService } from '@/utils/response/response.service';
-import { BoardMember } from '../board-member/entities/board-member.entity';
+import {
+    BoardMember,
+    ValidRoles,
+} from '../board-member/entities/board-member.entity';
 import { ResponseFormat } from '@/utils/response/response.type';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IBoardService } from './types/board.service.type';
 import { ErrorTypes } from '@/constants';
+import { BoardMemberService } from '../board-member/board-member.service';
 
 @Injectable()
 export class BoardService implements IBoardService {
@@ -18,9 +22,11 @@ export class BoardService implements IBoardService {
         @InjectRepository(BoardMember)
         private readonly boardMemberRepository: Repository<BoardMember>,
         private readonly responseService: ResponseService,
+        private readonly boardMemberService: BoardMemberService,
     ) {}
 
     async create(
+        userId: string,
         createBoardDto: CreateBoardDto,
     ): Promise<ResponseFormat<Board>> {
         try {
@@ -34,6 +40,10 @@ export class BoardService implements IBoardService {
                 );
 
             const board = await this.boardRepository.save(createBoardDto);
+            await this.boardMemberService.create(userId, {
+                boardId: board.id,
+                role: ValidRoles.ADMIN,
+            });
 
             return this.responseService.formatSuccess(board);
         } catch (error) {
