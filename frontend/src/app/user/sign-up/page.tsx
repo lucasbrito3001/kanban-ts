@@ -50,7 +50,7 @@ export default function SignUp() {
 			schema: SIGN_UP_FORM_FIELDS_SCHEMA,
 			isLoading: isLoadingSignUp,
 			showButton: true,
-			submitSuccessfully: true,
+			submitSuccessfully: false,
 			formId: "signUp",
 		});
 	};

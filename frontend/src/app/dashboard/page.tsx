@@ -64,16 +64,20 @@ export default function Dashboard() {
 	const hideModal = () => setIsVisibleModal(false);
 
 	const renderBoards = (): JSX.Element[] | undefined => {
-		return dataGetBoards?.map(({ board }, idx) => {
-			return (
-				<BoardCard
-					key={idx}
-					id={board.id}
-					name={board.name}
-					bgColor={board.bgColor}
-				/>
-			);
-		});
+		return dataGetBoards?.map(
+			({ quantityMembers, quantityLists, board }, idx) => {
+				return (
+					<BoardCard
+						key={idx}
+						id={board.id}
+						name={board.name}
+						quantityMembers={quantityMembers}
+						quantityLists={quantityLists}
+						bgColor={board.bgColor}
+					/>
+				);
+			}
+		);
 	};
 
 	const create: SubmitHandler<CreateBoardFormInputs> = async (

@@ -67,6 +67,27 @@ export class CardService {
         }
     }
 
+    async findByList(listId: string): Promise<ResponseFormat<Card[]>> {
+        try {
+            const cards = await this.cardRepository.find({
+                where: { list: { id: listId } },
+                relations: ['list'],
+            });
+
+            if (cards.length === 0)
+                return this.responseService.formatError(
+                    ErrorTypes.RESOURCE_NOT_FOUND,
+                );
+
+            return this.responseService.formatSuccess(cards);
+        } catch (error) {
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
+        }
+    }
+
     findOne(id: number) {
         return `This action returns a #${id} card`;
     }

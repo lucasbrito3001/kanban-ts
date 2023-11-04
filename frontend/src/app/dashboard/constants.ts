@@ -14,6 +14,8 @@ export type BoardMember = {
 	role: string;
 	createdAt: Date;
 	updatedAt: Date;
+	quantityLists: number;
+	quantityMembers: number;
 	board: Board;
 };
 

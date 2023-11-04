@@ -13,6 +13,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IBoardService } from './types/board.service.type';
 import { ErrorTypes } from '@/constants';
 import { BoardMemberService } from '../board-member/board-member.service';
+import { ListService } from '../list/list.service';
+import { lstatSync } from 'fs';
+import { CardService } from '../card/card.service';
 
 @Injectable()
 export class BoardService implements IBoardService {

@@ -49,16 +49,31 @@ export class ListService {
 
     async findByBoard(boardId: string): Promise<ResponseFormat<List[]>> {
         try {
-            const cards = await this.listRepository.findBy({
+            const lists = await this.listRepository.findBy({
                 board: { id: boardId },
             });
 
-            if (cards.length === 0)
+            if (lists.length === 0)
                 return this.responseService.formatError(
                     ErrorTypes.RESOURCE_NOT_FOUND,
                 );
 
-            return this.responseService.formatSuccess(cards);
+            return this.responseService.formatSuccess(lists);
+        } catch (error) {
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
+        }
+    }
+
+    async countByBoard(boardId: string): Promise<ResponseFormat<number>> {
+        try {
+            const countLists = await this.listRepository.countBy({
+                id: boardId,
+            });
+
+            return this.responseService.formatSuccess(countLists);
         } catch (error) {
             return this.responseService.formatError(
                 ErrorTypes.UNEXPECTED_EXCEPTION,

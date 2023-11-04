@@ -93,6 +93,21 @@ export class BoardMemberService {
         }
     }
 
+    async countByBoard(boardId: string): Promise<ResponseFormat<number>> {
+        try {
+            const countMembers = await this.boardMemberRepository.countBy({
+                id: boardId,
+            });
+
+            return this.responseService.formatSuccess(countMembers);
+        } catch (error) {
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
+        }
+    }
+
     async update(
         id: string,
         updateBoardMemberDto: UpdateBoardMemberDto,
