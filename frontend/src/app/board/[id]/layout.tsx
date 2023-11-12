@@ -27,15 +27,18 @@ export default function SignLayout({
 	}, []);
 
 	return (
-		<div className={`w-screen`}>
-			<Navbar height="8vh">
+		<div
+			className={`w-screen`}
+			style={{ backgroundColor: `#${board?.bgColor}` }}
+		>
+			<Navbar>
 				{board?.name}
 				<button className="flex items-center gap-2 rounded p-2 bg-sky-600 hover:bg-sky-700 transition-all transition-500 text-white font-bold text-sm">
 					<FaUserPlus width={32}></FaUserPlus> Add member
 				</button>
 				<FaCog></FaCog>
 			</Navbar>
-			<div className="h-[92vh] w-screen mt-[8vh]">{children}</div>
+			<div className="h-screen w-screen pt-[7vh]">{children}</div>
 		</div>
 	);
 }

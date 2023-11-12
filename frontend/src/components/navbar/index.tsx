@@ -3,18 +3,14 @@ import Logo from "../logo";
 
 export default function Navbar({
 	children,
-	height,
 }: {
 	children: React.ReactNode;
-	height?: string;
 }) {
 	return (
 		<nav
-			className={`${
-				height && `h-[${height}]`
-			} fixed w-full top-0 z-50 bg-white px-4 py-3 border-b`}
+			className={`h-[7vh] fixed w-full top-0 z-50 bg-[#fff6] px-4 py-1 shadow`}
 		>
-			<div className="flex justify-between items-center">
+			<div className="h-full flex justify-between items-center">
 				<a className="navbar-brand" href="#">
 					<Logo></Logo>
 				</a>

@@ -90,23 +90,37 @@ export class BoardController {
             );
 
         if (+full === 1) {
-            const [members, lists, cards] = await Promise.all([
+            const [members, lists] = await Promise.all([
                 this.boardMemberService.findByBoard(board.content.id),
                 this.listService.findByBoard(board.content.id),
-                this.cardService.findByBoard(board.content.id),
             ]);
 
-            if ((!members.status || !lists.status || !cards.status) === null)
+            if (!members.status || !lists.status)
                 return this.errorHandlerService.throwError(
-                    members.errorType || lists.errorType || cards.errorType,
-                    members.error || lists.error || cards.error,
+                    members.errorType || lists.errorType,
+                    members.error || lists.error,
                 );
+
+            if (lists.content.length > 0) {
+                for (let i = 0; i < lists.content.length; i++) {
+                    const cards = await this.cardService.findByList(
+                        lists.content[i].id,
+                    );
+
+                    if (!cards.status)
+                        return this.errorHandlerService.throwError(
+                            cards.errorType,
+                            cards.error,
+                        );
+
+                    lists.content[i].cards = cards.content;
+                }
+            }
 
             contentToReturn = {
                 ...contentToReturn,
                 members: members.content || [],
                 lists: lists.content || [],
-                cards: cards.content || [],
             };
         }
 

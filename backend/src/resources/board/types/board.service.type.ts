@@ -23,5 +23,4 @@ export interface IBoardService {
 export interface GetBoardContent extends Board {
     members: BoardMember[];
     lists: List[];
-    cards?: Card[];
 }

@@ -1,5 +1,3 @@
-import { api_gateway } from "./api";
-
 export const TOKEN_NAME = "SESSION_TOKEN";
 
 export const storeToken = (token: string): void => {

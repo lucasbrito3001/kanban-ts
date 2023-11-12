@@ -71,7 +71,6 @@ export class CardService {
         try {
             const cards = await this.cardRepository.find({
                 where: { list: { id: listId } },
-                relations: ['list'],
             });
 
             if (cards.length === 0)

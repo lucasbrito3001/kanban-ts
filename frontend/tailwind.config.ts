@@ -1,15 +1,19 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  // mode: 'jit',
+	// mode: 'jit',
 	content: [
 		"./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
 		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
 		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
 	],
 	theme: {
-		extend: {},
+		extend: {
+			animation: {
+				"spin-slow": "spin 2s linear infinite",
+			},
+		},
 	},
-	plugins: [],
+	plugins: [require("tailwind-scrollbar")({ nocompatible: true })],
 };
 export default config;
