@@ -1,9 +1,11 @@
 export default function List({
 	name,
 	children,
+	onCreateCard,
 }: {
 	name: string;
 	children: React.ReactNode;
+	onCreateCard: (type: "CARD") => void;
 }) {
 	return (
 		<div className="flex flex-col max-h-full bg-[#0d0d0ddf] text-white w-[260px] px-2 rounded">
@@ -22,7 +24,12 @@ export default function List({
 			>
 				<div className="pr-1">{children}</div>
 			</div>
-			<footer className="w-full flex-none p-2">+ Add new card</footer>
+			<footer
+				className="w-full flex-none p-2"
+				onClick={() => onCreateCard("CARD")}
+			>
+				+ Add new card
+			</footer>
 		</div>
 	);
 }

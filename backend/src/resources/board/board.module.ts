@@ -9,6 +9,7 @@ import { ListModule } from '../list/list.module';
 import { BoardMemberModule } from '../board-member/board-member.module';
 import { CardModule } from '../card/card.module';
 import { BoardMemberService } from '../board-member/board-member.service';
+import { TagModule } from '../tag/tag.module';
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { BoardMemberService } from '../board-member/board-member.service';
         BoardMemberModule,
         ListModule,
         CardModule,
+        TagModule,
     ],
     controllers: [BoardController],
     providers: [BoardService],

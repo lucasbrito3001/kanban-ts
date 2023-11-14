@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Card } from './entities/card.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ResponseService } from '@/utils/response/response.service';
 import { ErrorTypes } from '@/constants';
 import { List } from '../list/entities/list.entity';
 import { ResponseFormat } from '@/utils/response/response.type';
+import { Tag } from '../tag/entities/tag.entity';
 
 @Injectable()
 export class CardService {
@@ -16,6 +17,8 @@ export class CardService {
         private readonly cardRepository: Repository<Card>,
         @InjectRepository(List)
         private readonly listRepository: Repository<List>,
+        @InjectRepository(Tag)
+        private readonly tagRepository: Repository<Tag>,
         private readonly responseService: ResponseService,
     ) {}
 
@@ -71,6 +74,9 @@ export class CardService {
         try {
             const cards = await this.cardRepository.find({
                 where: { list: { id: listId } },
+                relations: {
+                    tags: true,
+                },
             });
 
             if (cards.length === 0)
@@ -96,17 +102,55 @@ export class CardService {
         updateCardDto: UpdateCardDto,
     ): Promise<ResponseFormat<Card>> {
         try {
-            const { affected } = await this.cardRepository.update(
-                id,
-                updateCardDto,
-            );
+            const { tagIds, ...cardDto } = updateCardDto;
+            let card: Card = await this.cardRepository.findOneBy({ id });
 
-            if (affected === 0)
+            if (card === null)
                 return this.responseService.formatError(
                     ErrorTypes.RESOURCE_NOT_FOUND,
                 );
 
-            const card = await this.cardRepository.findOneBy({ id });
+            const tags: Tag[] = await this.tagRepository.findBy({
+                id: In<string>(updateCardDto.tagIds),
+            });
+
+            card = { ...card, ...cardDto, tags };
+
+            this.cardRepository.save(card);
+
+            return this.responseService.formatSuccess(card);
+        } catch (error) {
+            console.log(error);
+            return this.responseService.formatError(
+                ErrorTypes.UNEXPECTED_EXCEPTION,
+                error,
+            );
+        }
+    }
+
+    async addTags(cardId: string, tagIds: string[]) {
+        try {
+            const card = await this.cardRepository.findOne({
+                where: {
+                    id: cardId,
+                },
+                relations: {
+                    tags: true,
+                },
+            });
+
+            if (card === null)
+                return this.responseService.formatError(
+                    ErrorTypes.RESOURCE_NOT_FOUND,
+                );
+
+            const tags = await this.tagRepository.findBy({
+                id: In<string>(tagIds),
+            });
+
+            card.tags = tags;
+
+            await this.cardRepository.save(card);
 
             return this.responseService.formatSuccess(card);
         } catch (error) {

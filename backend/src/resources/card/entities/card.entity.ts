@@ -1,9 +1,12 @@
 import { List } from '@/resources/list/entities/list.entity';
+import { Tag } from '@/resources/tag/entities/tag.entity';
 import {
     Column,
     CreateDateColumn,
     Entity,
     JoinColumn,
+    JoinTable,
+    ManyToMany,
     ManyToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
@@ -40,4 +43,8 @@ export class Card {
     })
     @JoinColumn({ name: 'listId' })
     public list!: List;
+
+    @ManyToMany(() => Tag)
+    @JoinTable()
+    public tags!: Tag[];
 }

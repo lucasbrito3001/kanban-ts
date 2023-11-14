@@ -8,6 +8,7 @@ export class CreateCardDto {
     asignee: string;
     dueDate: Date;
     listId: string;
+    tagIds?: string[];
 }
 
 export const createCardDtoSchema = Joi.object({
@@ -17,6 +18,7 @@ export const createCardDtoSchema = Joi.object({
     asignee: Joi.string().required(),
     dueDate: Joi.date().required(),
     list: Joi.string().required(),
+    tags: Joi.array(),
 });
 
 export const MOCK_CREATE_CARD_DTO = {
@@ -26,4 +28,5 @@ export const MOCK_CREATE_CARD_DTO = {
     asignee: MOCK_UUID,
     dueDate: new Date(),
     listId: MOCK_UUID,
+    tagIds: [MOCK_UUID],
 };

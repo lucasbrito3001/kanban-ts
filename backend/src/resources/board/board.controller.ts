@@ -23,6 +23,7 @@ import { ListService } from '../list/list.service';
 import { CardService } from '../card/card.service';
 import { Board } from './entities/board.entity';
 import { GetBoardContent } from './types/board.service.type';
+import { TagService } from '../tag/tag.service';
 
 @Controller('board')
 @UseGuards(AuthGuard)
@@ -32,6 +33,7 @@ export class BoardController {
         private readonly boardMemberService: BoardMemberService,
         private readonly listService: ListService,
         private readonly cardService: CardService,
+        private readonly tagService: TagService,
         private readonly errorHandlerService: ErrorHandlerService,
     ) {}
 
@@ -90,9 +92,10 @@ export class BoardController {
             );
 
         if (+full === 1) {
-            const [members, lists] = await Promise.all([
+            const [members, lists, tags] = await Promise.all([
                 this.boardMemberService.findByBoard(board.content.id),
                 this.listService.findByBoard(board.content.id),
+                this.tagService.findByBoard(board.content.id),
             ]);
 
             if (!members.status || !lists.status)
@@ -120,6 +123,7 @@ export class BoardController {
             contentToReturn = {
                 ...contentToReturn,
                 members: members.content || [],
+                tags: tags.content || [],
                 lists: lists.content || [],
             };
         }
